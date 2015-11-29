@@ -1,6 +1,6 @@
 #! /usr/bin/pythonw
 # Algorithm Name: Keccak
-# Authors: Guido Bertoni, Joan Daemen, Michal Peeters and Gilles Van Assche
+# Authors: Guido Bertoni, Joan Daemen, Michaël Peeters and Gilles Van Assche
 # Implementation by Renaud Bauvin, STMicroelectronics
 #
 # This code, originally by Renaud Bauvin, is hereby put in the public domain.
@@ -144,7 +144,7 @@ class Keccak:
     ### Conversion functions String <-> Table (and vice-versa)
 
     def convertStrToTable(self,string):
-        """Convert a string of bytes to its 5 5 matrix representation
+        """Convert a string of bytes to its 5×5 matrix representation
 
         string: string of bytes of hex-coded bytes (e.g. '9A2C...')"""
 
@@ -168,13 +168,13 @@ class Keccak:
         return output
 
     def convertTableToStr(self,table):
-        """Convert a 5 5 matrix representation to its string representation"""
+        """Convert a 5×5 matrix representation to its string representation"""
 
         #Check input format
         if self.w%8!= 0:
             raise KeccakError.KeccakError("w is not a multiple of 8")
         if (len(table)!=5) or (False in [len(row)==5 for row in table]):
-	    raise KeccakError.KeccakError("table must be 5 5")
+	    raise KeccakError.KeccakError("table must be 5×5")
 
         #Convert
         output=['']*25
@@ -232,7 +232,7 @@ class Keccak:
     def Round(self,A,RCfixed):
         """Perform one round of computation as defined in the Keccak-f permutation
 
-        A: current state (5 5 matrix)
+        A: current state (5×5 matrix)
         RCfixed: value of round constant to use (integer)
         """
 
@@ -274,7 +274,7 @@ class Keccak:
     def KeccakF(self,A, verbose=False):
         """Perform Keccak-f function on the state A
 
-        A: 5 5 matrix containing the state
+        A: 5×5 matrix containing the state
         verbose: a boolean flag activating the printing of intermediate computations
         """
 

@@ -1,6 +1,6 @@
 #! /usr/bin/pythonw
 # Algorithm Name: Keccak
-## Authors: Guido Bertoni, Joan Daemen, Michal Peeters and Gilles Van Assche
+# Authors: Guido Bertoni, Joan Daemen, Michaël Peeters and Gilles Van Assche
 # Implementation by Renaud Bauvin, STMicroelectronics
 #
 # This code, originally by Renaud Bauvin, is hereby put in the public domain.
