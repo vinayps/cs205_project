@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 #! /usr/bin/pythonw
 # Algorithm Name: Keccak
 # Authors: Guido Bertoni, Joan Daemen, Michaël Peeters and Gilles Van Assche
