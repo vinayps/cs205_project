@@ -1,14 +1,14 @@
-# This Python file uses the following encoding: utf-8
-#! /usr/bin/pythonw
-# Algorithm Name: Keccak
-# Authors: Guido Bertoni, Joan Daemen, Michal Peeters and Gilles Van Assche
-# Implementation by Renaud Bauvin, STMicroelectronics
-#
-# This code, originally by Renaud Bauvin, is hereby put in the public domain.
-# It is given as is, without any guarantee.
+# -*- coding: utf-8 -*-
+# The Keccak sponge function, designed by Guido Bertoni, Joan Daemen,
+# Michaël Peeters and Gilles Van Assche. For more information, feedback or
+# questions, please refer to our website: http://keccak.noekeon.org/
 # 
-# For more information, feedback or questions, please refer to our website:
-# http://keccak.noekeon.org/
+# Implementation by Renaud Bauvin,
+# hereby denoted as "the implementer".
+# 
+# To the extent possible under law, the implementer has waived all copyright
+# and related or neighboring rights to the source code in this file.
+# http://creativecommons.org/publicdomain/zero/1.0/
 
 import math
 
@@ -92,15 +92,6 @@ class Keccak:
         n = n%self.w
         return ((x>>(self.w-n))+(x<<n))%(1<<self.w)
 
-    def enc(self,x,n):
-        """Encode the integer x in n bits (n must be a multiple of 8)"""
-
-        if x>=2**n:
-            raise KeccakError.KeccakError('x is too big to be coded in n bits')
-        if n%8!=0:
-            raise KeccakError.KeccakError('n must be a multiple of 8')
-        return ("%%0%dX" % (2*n//8)) % (x)
-
     def fromHexStringToLane(self, string):
         """Convert a string of bytes written in hexadecimal to a lane value"""
 
@@ -145,7 +136,7 @@ class Keccak:
     ### Conversion functions String <-> Table (and vice-versa)
 
     def convertStrToTable(self,string):
-        """Convert a string of bytes to its 5 5 matrix representation
+        """Convert a string of bytes to its 5×5 matrix representation
 
         string: string of bytes of hex-coded bytes (e.g. '9A2C...')"""
 
@@ -169,13 +160,13 @@ class Keccak:
         return output
 
     def convertTableToStr(self,table):
-        """Convert a 5 5 matrix representation to its string representation"""
+        """Convert a 5×5 matrix representation to its string representation"""
 
         #Check input format
         if self.w%8!= 0:
             raise KeccakError.KeccakError("w is not a multiple of 8")
         if (len(table)!=5) or (False in [len(row)==5 for row in table]):
-            raise KeccakError.KeccakError("table must be 5 5")
+            raise KeccakError.KeccakError("table must be 5×5")
 
         #Convert
         output=['']*25
@@ -185,55 +176,10 @@ class Keccak:
         output =''.join(output).upper()
         return output
 
-    ### Padding function
-
-    def pad(self,M, n):
-        """Pad M with reverse-padding to reach a length multiple of n
-
-        M: message pair (length in bits, string of hex characters ('9AFC...')
-        n: length in bits (must be a multiple of 8)
-        Example: pad([60, 'BA594E0FB9EBBD30'],8) returns 'BA594E0FB9EBBD13'
-        """
-
-        [my_string_length, my_string]=M
-
-        # Check the parameter n
-        if n%8!=0:
-            raise KeccakError.KeccakError("n must be a multiple of 8")
-
-        # Check the length of the provided string
-        if len(my_string)%2!=0:
-            #Pad with one '0' to reach correct length (don't know test
-            #vectors coding)
-            my_string=my_string+'0'
-        if my_string_length>(len(my_string)//2*8):
-            raise KeccakError.KeccakError("the string is too short to contain the number of bits announced")
-
-        #Add the bit allowing reversible padding
-        nr_bytes_filled=my_string_length//8
-        if nr_bytes_filled==len(my_string)//2:
-            #bits fill the whole package: add a byte '01'
-            my_string=my_string+"01"
-        else:
-            #there is no addition of a byte... modify the last one
-            nbr_bits_filled=my_string_length%8
-
-            #Add the leading bit
-            my_byte=int(my_string[nr_bytes_filled*2:nr_bytes_filled*2+2],16)
-            my_byte=(my_byte>>(8-nbr_bits_filled))
-            my_byte=my_byte+2**(nbr_bits_filled)
-            my_byte="%02X" % my_byte
-            my_string=my_string[0:nr_bytes_filled*2]+my_byte
-
-        #Complete my_string to reach a multiple of n bytes
-        while((8*len(my_string)//2)%n!=0):
-            my_string=my_string+'00'
-        return my_string
-
     def Round(self,A,RCfixed):
         """Perform one round of computation as defined in the Keccak-f permutation
 
-        A: current state (5 5 matrix)
+        A: current state (5×5 matrix)
         RCfixed: value of round constant to use (integer)
         """
 
@@ -275,7 +221,7 @@ class Keccak:
     def KeccakF(self,A, verbose=False):
         """Perform Keccak-f function on the state A
 
-        A: 5 5 matrix containing the state
+        A: 5×5 matrix containing the state
         verbose: a boolean flag activating the printing of intermediate computations
         """
 
@@ -291,28 +237,121 @@ class Keccak:
 
         return A
 
-    def Keccak(self,M,r=1024,c=576,d=0,n=1024,verbose=False):
+    def appendBit(self, M, bit):
+        """Append a bit to M
+
+        M: message pair (length in bits, string of hex characters ('9AFC...'))
+        bit: 0 or 1
+        Example: appendBit([7, '30'],1) returns [8,'B0']
+        Example: appendBit([8, '30'],1) returns [9,'3001']
+        """
+        [my_string_length, my_string]=M
+        if my_string_length>(len(my_string)//2*8):
+            raise KeccakError.KeccakError("the string is too short to contain the number of bits announced")
+        if ((my_string_length%8) == 0):
+            my_string = my_string[0:my_string_length//8*2] + "%02X" % bit
+            my_string_length = my_string_length + 1
+        else:
+            nr_bytes_filled = my_string_length//8
+            nbr_bits_filled = my_string_length%8
+            my_byte = int(my_string[nr_bytes_filled*2:nr_bytes_filled*2+2],16)
+            my_byte = my_byte + bit*(2**(nbr_bits_filled))
+            my_byte = "%02X" % my_byte
+            my_string = my_string[0:nr_bytes_filled*2] + my_byte
+            my_string_length = my_string_length + 1
+        return [my_string_length, my_string]
+
+    def appendDelimitedSuffix(self, M, suffix):
+        """Append a delimited suffix to M
+
+        M: message pair (length in bits, string of hex characters ('9AFC...'))
+        suffix: integer coding a string of 0 to 7 bits, from LSB to MSB, delimited by a bit 1 at MSB
+        Example: appendDelimitedSuffix([3, '00'], 0x06) returns [5, '10']
+        Example: appendDelimitedSuffix([3, '00'], 0x1F) returns [7, '78']
+        Example: appendDelimitedSuffix([8, '00'], 0x06) returns [10, '0002']
+        Example: appendDelimitedSuffix([8, '00'], 0x1F) returns [12, '000F']
+        """
+        if (suffix == 0):
+            raise KeccakError.KeccakError("the delimited suffix must not be zero")
+        while(suffix != 1):
+            M = self.appendBit(M, suffix%2)
+            suffix = suffix//2
+        return M
+
+    def delimitedSuffixInBinary(self, delimitedSuffix):
+        binary = ''
+        while(delimitedSuffix != 1):
+            binary = binary + ('%d' % (delimitedSuffix%2))
+            delimitedSuffix = delimitedSuffix//2
+        return binary
+
+    ### Padding rule
+
+    def pad10star1(self, M, n):
+        """Pad M with the pad10*1 padding rule to reach a length multiple of r bits
+
+        M: message pair (length in bits, string of hex characters ('9AFC...')
+        n: length in bits (must be a multiple of 8)
+        Example: pad10star1([60, 'BA594E0FB9EBBD03'],8) returns 'BA594E0FB9EBBD93'
+        """
+
+        [my_string_length, my_string]=M
+
+        # Check the parameter n
+        if n%8!=0:
+            raise KeccakError.KeccakError("n must be a multiple of 8")
+
+        # Check the length of the provided string
+        if len(my_string)%2!=0:
+            raise KeccakError.KeccakError("there must be an even number of digits")
+        if my_string_length>(len(my_string)//2*8):
+            raise KeccakError.KeccakError("the string is too short to contain the number of bits announced")
+
+        nr_bytes_filled=my_string_length//8
+        nbr_bits_filled=my_string_length%8
+        l = my_string_length % n
+        if ((n-8) <= l <= (n-2)):
+            if (nbr_bits_filled == 0):
+                my_byte = 0
+            else:
+                my_byte=int(my_string[nr_bytes_filled*2:nr_bytes_filled*2+2],16)
+            my_byte=my_byte+2**(nbr_bits_filled)+2**7
+            my_byte="%02X" % my_byte
+            my_string=my_string[0:nr_bytes_filled*2]+my_byte
+        else:
+            if (nbr_bits_filled == 0):
+                my_byte = 0
+            else:
+                my_byte=int(my_string[nr_bytes_filled*2:nr_bytes_filled*2+2],16)
+            my_byte=my_byte+2**(nbr_bits_filled)
+            my_byte="%02X" % my_byte
+            my_string=my_string[0:nr_bytes_filled*2]+my_byte
+            while((8*len(my_string)//2)%n < (n-8)):
+                my_string=my_string+'00'
+            my_string = my_string+'80'
+
+        return my_string
+
+    def Keccak(self,M,r=1024,c=576,suffix=0x01,n=1024,verbose=False):
         """Compute the Keccak[r,c,d] sponge function on message M
 
         M: message pair (length in bits, string of hex characters ('9AFC...')
         r: bitrate in bits (defautl: 1024)
         c: capacity in bits (default: 576)
-        d: diversifier in bits (default: 0 bits)
+        suffix: the delimited suffix to append to all inputs (0x01 means none, 0x06 for SHA3-* and 0x1F for SHAKE*)
         n: length of output in bits (default: 1024),
         verbose: print the details of computations(default:False)
         """
 
         #Check the inputs
         if (r<0) or (r%8!=0):
-            raise KeccakError.KeccakError('r must be a multiple of 8')
+            raise KeccakError.KeccakError('r must be a multiple of 8 in this implementation')
         if (n%8!=0):
             raise KeccakError.KeccakError('outputLength must be a multiple of 8')
-        if (d<0) or (d>255):
-            raise KeccakError.KeccakError('d must be in the range [0, 255]')
         self.setB(r+c)
 
         if verbose:
-            print("Create a Keccak function with (r=%d, c=%d, d=%d (i.e. w=%d))" % (r,c,d,(r+c)//25))
+            print("Create a Keccak[r=%d, c=%d] function with '%s' suffix" % (r,c,self.delimitedSuffixInBinary(suffix)))
 
         #Compute lane length (in bits)
         w=(r+c)//25
@@ -324,9 +363,13 @@ class Keccak:
            [0,0,0,0,0],
            [0,0,0,0,0]]
 
+        # Appending the suffix
+        M = self.appendDelimitedSuffix(M, suffix)
+        if verbose:
+            print("After appending the suffix: ", M)
+
         #Padding of messages
-        P=self.pad(M,8) + self.enc(d,8) + self.enc(r//8,8)
-        P=self.pad([8*len(P)//2,P],r)
+        P = self.pad10star1(M, r)
 
         if verbose:
             print("String ready to be absorbed: %s (will be completed by %d x '00')" % (P, c//8))

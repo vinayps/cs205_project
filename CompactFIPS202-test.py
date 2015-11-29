@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-# The Keccak sponge function, designed by Guido Bertoni, Joan Daemen,
-# Michaël Peeters and Gilles Van Assche. For more information, feedback or
-# questions, please refer to our website: http://keccak.noekeon.org/
-# 
 # Implementation by Renaud Bauvin,
 # hereby denoted as "the implementer".
-# 
+#
 # To the extent possible under law, the implementer has waived all copyright
 # and related or neighboring rights to the source code in this file.
 # http://creativecommons.org/publicdomain/zero/1.0/
 
-import Keccak
+import binascii
+import CompactFIPS202
 import os
 
 ## Iterate through the files 'Short... and LongMsgKAT_XXX.txt' containing the
@@ -28,58 +25,52 @@ instances=[
     ['SHA3-512', 576, 1024, 0x06, 512],
 ]
 fileTypes=['Short']
-#fileTypes=['Short', 'Long']
 
-
-#String comparison function (useful later to compare test vector and computation
-def sameString(string1, string2):
-    """Compare 2 strings"""
-
-    if len(string1)!=len(string2):
-        return False
-    for i in range(len(string1)):
-        if string1[i]!=string2[i]:
-            return False
-    return True
-
-#Create an instance
-myKeccak=Keccak.Keccak()
+def delimitedSuffixInBinary(delimitedSuffix):
+    binary = ''
+    while(delimitedSuffix != 1):
+        binary = binary + ('%d' % (delimitedSuffix%2))
+        delimitedSuffix = delimitedSuffix//2
+    return binary
 
 for instance in instances:
     [fileNameSuffix, r, c, delimitedSuffix, n] = instance
     for fileType in fileTypes:
         print('Processing file: %sMsgKAT_%s.txt...' % (fileType, fileNameSuffix))
-        print("Keccak[r=%d, c=%d] with '%s' suffix" % (r, c, myKeccak.delimitedSuffixInBinary(delimitedSuffix)))
+        print("Keccak[r=%d, c=%d] with '%s' suffix" % (r, c, delimitedSuffixInBinary(delimitedSuffix)))
 
         #Open the corresponding file
         try:
-            reference=open(os.path.join(dirTestVector,fileType+('MsgKAT_%s.txt' % fileNameSuffix)), 'r')
+            referenceFile=open(os.path.join(dirTestVector,fileType+('MsgKAT_%s.txt' % fileNameSuffix)), 'r')
         except IOError:
             print("Error: test vector files must be stored in %s" % (dirTestVector))
             exit()
 
         #Parse the document line by line (works only for Short and Long files)
-        for line in reference:
+        for line in referenceFile:
             if line.startswith('Len'):
                 Len=int(line.split(' = ')[1].strip('\n\r'))
             if line.startswith('Msg'):
                 Msg=line.split(' = ')[1].strip('\n\r')
+                msg = bytearray(binascii.unhexlify(Msg))
+                msg = msg[:Len//8]
             if (line.startswith('MD') or line.startswith('Squeezed')):
                 MD_ref=line.split(' = ')[1].strip('\n\r')
+                reference = bytearray(binascii.unhexlify(MD_ref))
                 # If line starts with 'Squeezed', use the output length from the test vector
                 if line.startswith('Squeezed'):
-                    n = (len(MD_ref)//2)*8
+                    n = len(reference)*8
                 elif n == 0:
                     print("Error: the output length should be specified")
                     exit()
 
-                # Perform our own computation
-                MD_comp=myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, n, verbose)
-
-                #Compare the results
-                if not sameString(MD_comp,MD_ref):
-                    print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, MD_ref, MD_comp))
-                    exit()
+                if ((Len % 8) == 0):
+                    # Perform our own computation
+                    computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
+                    #Compare the results
+                    if (computed != reference):
+                        print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, binascii.hexlify(reference), binascii.hexlify(computed)))
+                        exit()
 
         print("OK\n")
-        reference.close()
+        referenceFile.close()
