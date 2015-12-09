@@ -12,9 +12,6 @@
 #  define _mm256_fmadd_ps(a, b, c) _mm256_add_ps(_mm256_mul_ps((a), (b)), (c))
 #  define _mm256_fmsub_ps(a, b, c) _mm256_sub_ps(_mm256_mul_ps((a), (b)), (c))
 #endif
-
-// Permute
-#define permute8(a, b) _mm256_permutevar8x32_epi32(a, b)
     
 //Float
 typedef __m256 float8;
@@ -38,6 +35,7 @@ typedef __m256i int8;
 #define sub(a, b)             _mm256_sub_ps((a), (b))
 #define sub_int(a, b)         _mm256_sub_epi32((a), (b))    
 #define div(a, b)             _mm256_div_ps((a), (b))
+    
 //Bitwise
 #define bitwise_and(a, b)     _mm256_and_ps((a), (b))
 #define bitwise_andnot(a, b)  _mm256_andnot_ps((a), (b))
@@ -45,13 +43,22 @@ typedef __m256i int8;
 #define bitwise_xor_int(a, b)  _mm256_xor_si256((a), (b)) 
 #define bitwise_right_shift(a, b) _mm256_srlv_epi32(a, b)
 #define bitwise_left_shift(a, b) _mm256_sllv_epi32(a, b)
-
+    
+// Rotate - unfortunately doesnt work on our processors - needs AVX 512
+#define bitwise_rot_l_64(a, b) _mm256_rol_epi64(a, b)  
+#define bitwise_rot_r_64(a, b) _mm256_ror_epi64(a, b)
     
 //Logical
 #define less_than(a, b)        _mm256_cmp_ps((a), (b), _CMP_LT_OS)
 #define greater_than(a, b)     _mm256_cmp_ps((a), (b), _CMP_GT_OS)
+    
 //Helpers
 #define signs(a)               (_mm256_movemask_ps(a) & 255)
 
 #define to_mem(reg, mem)       _mm256_storeu_ps(mem, reg)
 #define to_mem_int(reg, mem)   _mm256_storeu_si256(mem, reg)
+    
+// Permute
+#define permute8(a, b) _mm256_permutevar8x32_epi32(a, b)
+    
+    

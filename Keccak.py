@@ -216,6 +216,7 @@ class Keccak:
         #Iota step
         A[0][0] = A[0][0]^RCfixed
 
+        #print A
         return A
 
     def KeccakF(self,A, verbose=False):

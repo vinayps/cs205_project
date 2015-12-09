@@ -20,12 +20,12 @@ import os
 dirTestVector=os.path.abspath(os.path.join('.'))
 verbose=False
 instances=[
-    ['SHAKE128', 1344, 256, 0x1F, 0],
-    ['SHAKE256', 1088, 512, 0x1F, 0],
-    ['SHA3-224', 1152, 448, 0x06, 224],
-    ['SHA3-256', 1088, 512, 0x06, 256],
-    ['SHA3-384', 832, 768, 0x06, 384],
-    ['SHA3-512', 576, 1024, 0x06, 512],
+#    ['SHAKE128', 1344, 256, 0x1F, 0],
+#    ['SHAKE256', 1088, 512, 0x1F, 0],
+#    ['SHA3-224', 1152, 448, 0x06, 224],
+#    ['SHA3-256', 1088, 512, 0x06, 256],
+#    ['SHA3-384', 832, 768, 0x06, 384],
+    ['SHA3-512', 144, 256, 0x06, 512], #change 576 1024
 ]
 fileTypes=['Short']
 #fileTypes=['Short', 'Long']
@@ -43,7 +43,7 @@ def sameString(string1, string2):
     return True
 
 #Create an instance
-myKeccak=Keccak.Keccak()
+myKeccak=Keccak.Keccak(400)
 
 for instance in instances:
     [fileNameSuffix, r, c, delimitedSuffix, n] = instance
@@ -74,11 +74,14 @@ for instance in instances:
                     exit()
 
                 # Perform our own computation
-                MD_comp=myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, n, verbose)
+                if Len == 1992: # restricting for testing
+                    MD_comp=myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, n, verbose)
+                else:
+                    continue
 
-                #Compare the results
-                if not sameString(MD_comp,MD_ref):
-                    print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, MD_ref, MD_comp))
+                #Compare the results - commented out as we are using Keccak400 and the reference results are for Keccak1600
+                #if not sameString(MD_comp,MD_ref):
+                #    print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, MD_ref, MD_comp))
                     exit()
 
         print("OK\n")

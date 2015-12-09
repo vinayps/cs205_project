@@ -14,6 +14,7 @@ import sys
 import os.path
 sys.path.append(os.path.join('.', 'util'))
 from timer import Timer 
+import Keccak
     
 ## Iterate through the files 'Short... and LongMsgKAT_XXX.txt' containing the
 ## test vectors and compare the computed values to the provided ones
@@ -22,14 +23,17 @@ from timer import Timer
 dirTestVector=os.path.abspath(os.path.join('.'))
 verbose=False
 instances=[
-    ['SHAKE128', 1344, 256, 0x1F, 0],
-    ['SHAKE256', 1088, 512, 0x1F, 0],
-    ['SHA3-224', 1152, 448, 0x06, 224],
-    ['SHA3-256', 1088, 512, 0x06, 256],
-    ['SHA3-384', 832, 768, 0x06, 384],
-    ['SHA3-512', 576, 1024, 0x06, 512],
+    ['SHAKE128', 336, 64, 0x1F, 0], # 1344, 256
+    ['SHAKE256', 272, 128, 0x1F, 0], # 1088, 512
+    ['SHA3-224', 288, 112, 0x06, 224], # 1152, 448
+    ['SHA3-256', 272, 128, 0x06, 256], # 1088, 512
+    ['SHA3-384', 208, 192, 0x06, 384], # 832, 768
+    ['SHA3-512', 144, 256, 0x06, 512],  # change 576  1024
 ]
 fileTypes=['Short']
+
+#Create an instance for reference
+myKeccak=Keccak.Keccak(400)
 
 def delimitedSuffixInBinary(delimitedSuffix):
     binary = ''
@@ -72,17 +76,16 @@ with Timer() as t:
                         print("Error: the output length should be specified")
                         exit()
 
-                    if ((Len % 8) == 0 and Len > 100): # greater than 100 is my addition
+                    if ((Len % 8) == 0 and Len > 100 ): #and ( Len == 1992 )): # greater than 100 is my addition
                         #print Len
                         # Perform our own computation
                         #computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
                         computed = CompactFIPS202_mod.Keccak(r, c, msg, delimitedSuffix, n//8)
                         #Compare the results
-                        if (computed != reference):
-                            print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, binascii.hexlify(reference), binascii.hexlify(computed)))
+                        reference = myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, (len(MD_ref)//2)*8, False)
+                        if (binascii.hexlify(computed).upper() != reference):
+                            print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, reference, binascii.hexlify(computed))) # binascii.hexlify(reference)
                             exit()
-                        #else:
-                        #    print "success"
         
             print("OK\n")
             referenceFile.close()
