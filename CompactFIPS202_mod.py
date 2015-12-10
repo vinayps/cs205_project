@@ -107,16 +107,21 @@ def KeccakF400(state, useAVX = True):
     return state
 
 def Keccak(rate, capacity, inputBytes, delimitedSuffix, outputByteLen, useAVX = True):
+    
     outputBytes = bytearray()
     state = bytearray([0 for i in range(50)]) 
     rateInBytes = rate//8
     blockSize = 0
+    
     if (((rate + capacity) != 400) or ((rate % 8) != 0)): 
         return
+    
     inputOffset = 0
+    
     # === Absorb all the input blocks ===
     while(inputOffset < len(inputBytes)):
         blockSize = min(len(inputBytes)-inputOffset, rateInBytes)
+        
         if useAVX:
             state1 = bytearray([0 for i in range(50)]) 
             kh.keccak_absorb( inputBytes, blockSize, state, state1, inputOffset )
@@ -124,25 +129,34 @@ def Keccak(rate, capacity, inputBytes, delimitedSuffix, outputByteLen, useAVX = 
         else:
             for i in range(blockSize):
                 state[i] = state[i] ^ inputBytes[i+inputOffset]
+                
         inputOffset = inputOffset + blockSize
+        
         if (blockSize == rateInBytes):
             state = KeccakF400(state, useAVX)
             blockSize = 0
+            
     # === Do the padding and switch to the squeezing phase ===
     state[blockSize] = state[blockSize] ^ delimitedSuffix
+    
     if (((delimitedSuffix & 0x80) != 0) and (blockSize == (rateInBytes-1))):
         state = KeccakF400(state, useAVX)
+        
     state[rateInBytes-1] = state[rateInBytes-1] ^ 0x80
     state = KeccakF400(state, useAVX)
+    
     # === Squeeze out all the output blocks ===
     while(outputByteLen > 0):
         blockSize = min(outputByteLen, rateInBytes)
         outputBytes = outputBytes + state[0:blockSize]
         outputByteLen = outputByteLen - blockSize
+        
         if (outputByteLen > 0):
             state = KeccakF400(state, useAVX)
+            
     return outputBytes
 
+# Example function calls for Keccak 1600
 def SHAKE128(inputBytes, outputByteLen):
     return Keccak(1344, 256, inputBytes, 0x1F, outputByteLen)
 

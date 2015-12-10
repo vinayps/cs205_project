@@ -77,15 +77,15 @@ with Timer() as t:
                             print("Error: the output length should be specified")
                             exit()
 
-                        if ((Len % 8) == 0 and ( Len == 104 )): 
-                            print Len
+                        if ((Len % 8) == 0 ): #and ( Len == 104 )): 
+                            #print Len
                             # Perform our own computation
                             #computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
-                            computed = CompactFIPS202_mod.Keccak(r, c, msg, delimitedSuffix, n//8)
-                            print binascii.hexlify(computed)
+                            computed = CompactFIPS202_mod.Keccak(r, c, msg, delimitedSuffix, n//8, useAVX = True)
+                            #print binascii.hexlify(computed)
                             #Compare the results
                             reference = myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, (len(MD_ref)//2)*8, False)
-                            print reference
+                            #print reference
                             if (binascii.hexlify(computed).upper() != reference):
                                 print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, reference, binascii.hexlify(computed))) # binascii.hexlify(reference)
                                 exit()
