@@ -1,10 +1,11 @@
-#import sha3
 import Keccak
-#import KeccakError
+import CompactFIPS202_mod
 import array
 import time
+import binascii
 from multiprocessing import Pool
 import sys, getopt
+from functools import partial
 
 # setting this globally
 K = Keccak.Keccak(400)
@@ -12,13 +13,19 @@ K = Keccak.Keccak(400)
 def main(argv):
     inputfile = ''
     inputmessage = ''
-    try:
-        opts, args = getopt.getopt(argv, "hi:m:", ["ifile=","imessage="])
+    
+    # Default values for Keccak and tree hashing parameters
+    h = 3 # treeHeight - performs well for file sizes 1 MB and upwards; and smaller files have much smaller runtime anyway
+    d = 4 # treeDegree
+    outputLength = 512 # default with SHA3-512
+    
+    try: # if both i and m are passed in, we pick m
+        opts, args = getopt.getopt(argv, "ui:m:h:d:o:", ["ifile=","imessage=", "treeHeight=", "treeDegree=", "outputLength="])
     except getopt.GetoptError:
         print 'tree.py -i <inputfile> \ntest.py -m <inputmessage>'
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-h':
+        if opt == '-u': #usage
             print 'tree.py -i <inputfile> \ntest.py -m <inputmessage>'
             sys.exit()
         elif opt in ("-i", "--ifile"):
@@ -27,21 +34,26 @@ def main(argv):
         elif opt in ("-m", "--imessage"):
             inputmessage = arg
             M = getMessageFromString(inputmessage)
+        elif opt in ("-h", "--treeHeight"):
+            assert arg.isdigit() == True, "treeHeight argument expected to be an integer"
+            h = int(arg)
+        elif opt in ("-d", "--treeDegree"):
+            assert arg.isdigit() == True, "treeDegree argument expected to be an integer"
+            d = int(arg)
+        elif opt in ("-o", "--outputLength"):
+            assert arg.isdigit() == True, "outputLength argument expected to be an integer"
+            outputLength = int(arg)
             
-    fM1, fM2 = None, None
-
     print 'Final output (tree hashing)'
     print '================='
 
-    # print M
-
     # Tree hash
-    for h in xrange(0, 5):
-        print 'Height:', h
-        startT = time.time()
-        tRet = treeHash(M, K, H=h)
-        print tRet, len(tRet)*4
-        print 'H = %d time:'%h, time.time() - startT
+    #for h in xrange(0, 5):
+    print 'Height:', h
+    startT = time.time()
+    tRet = treeHash(M, K, h, d, outputLength)
+    print tRet, len(tRet)*4
+    print 'H = %d time:'%h, time.time() - startT
     
     # Using normal Keccak function
     # http://stackoverflow.com/questions/3470398/list-of-integers-into-string-byte-array-python
@@ -50,7 +62,13 @@ def main(argv):
     startT = time.time()
     BStr = ''.join( map(str,M) )
     hexB = "{0:0x}".format(int(BStr, 2)) if BStr != '' else ''
-    res = K.Keccak( (len(M), hexB), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
+    #res = K.Keccak( (len(M), hexB), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
+    msg = bytearray(binascii.unhexlify(hexB))
+    msg = msg[:len(msg)]
+    res = binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, 512//8)).upper()
+    #print res
+    #print res_avx
+    #assert res == res_avx, "Not matching"
     print res, len(res)*4
     print 'Time = ', time.time() - startT
         
@@ -66,21 +84,22 @@ def bits(f, message = False):
             yield (b >> i) & 1
 
 def getMessageFromFile(inputfile):
-    f = open(inputfile, 'r') # '100KB.bin'
+    f = open(inputfile, 'r') 
     M = ''.join( map(str, [b for b in bits(f)]) )
     f.close()
     return M
 
 def getMessageFromString(inputmessage):
-    #f = open(inputfile, 'r') # '100KB.bin'
     M = ''.join( map(str, [b for b in bits(inputmessage, message = True)]) )
-    #f.close()
     return M
 
-def workProc(hashStr):
-    return K.Keccak((len(hashStr)*4, hashStr), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
+def workProc(hashStr, outputLength):
+    #return K.Keccak((len(hashStr)*4, hashStr), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
+    msg = bytearray(binascii.unhexlify(hashStr))
+    msg = msg[:len(msg)]
+    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8)).upper()
 
-def treeHash(M, K, B = 1024, H = 2, D = 4):
+def treeHash(M, K, H, D, outputLength, B = 1024):
     # Perform hashing at each layer and then concatenate
     L = D**H
     TS = sum([D**i for i in xrange(0, H+1)])
@@ -96,10 +115,12 @@ def treeHash(M, K, B = 1024, H = 2, D = 4):
     for i in xrange(0, nGroups):
         tree[len(tree) - L + i%L].append(M[i*B: (i+1)*B])
 
-
     for i in xrange(0, L):
         curB = ''.join(tree[len(tree) - i - 1])
         tree[len(tree) - i - 1] = curB
+    
+    # creating a partial function to use in pool.map 
+    workProc_handler = partial(workProc, outputLength = outputLength)
     
     # startT2 = time.time()
     for curL in range(H, -1, -1): # Work through each level of the tree in turn
@@ -120,7 +141,7 @@ def treeHash(M, K, B = 1024, H = 2, D = 4):
                 if tree[i] != '':
                     tree[i] = "{0:0{1}x}".format(int(tree[i], 2), len(tree[i])/4)
 
-        tree[curIdx: curIdx+curN] = p.map(workProc, tree[curIdx: curIdx+curN])
+        tree[curIdx: curIdx+curN] = p.map(workProc_handler, tree[curIdx: curIdx+curN])
     # print 'H = %d time:'%H, time.time() - startT2
     return tree[0]
 
