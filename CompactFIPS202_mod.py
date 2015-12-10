@@ -40,36 +40,7 @@ reload(kh)
 def ROL16(a, n):
     return ((a >> (16-(n%16))) + (a << (n%16))) % (1 << 16)
 
-def ROL64(a, n):
-    return ((a >> (64-(n%64))) + (a << (n%64))) % (1 << 64)
-
-def KeccakF1600onLanes(lanes):
-    R = 1
-    for round in range(24):
-        # θ
-        C = [lanes[x][0] ^ lanes[x][1] ^ lanes[x][2] ^ lanes[x][3] ^ lanes[x][4] for x in range(5)]
-        D = [C[(x+4)%5] ^ ROL64(C[(x+1)%5], 1) for x in range(5)]
-        lanes = [[lanes[x][y]^D[x] for y in range(5)] for x in range(5)]
-        # ρ and π
-        (x, y) = (1, 0)
-        current = lanes[x][y]
-        for t in range(24):
-            (x, y) = (y, (2*x+3*y)%5)
-            (current, lanes[x][y]) = (lanes[x][y], ROL64(current, (t+1)*(t+2)//2))
-        # χ
-        for y in range(5):
-            T = [lanes[x][y] for x in range(5)]
-            for x in range(5):
-                lanes[x][y] = T[x] ^((~T[(x+1)%5]) & T[(x+2)%5])
-        # ι
-        for j in range(7):
-            R = ((R << 1) ^ ((R >> 7)*0x71)) % 256
-            if (R & 2):
-                lanes[0][0] = lanes[0][0] ^ (1 << ((1<<j)-1))
-    return lanes
-
 def KeccakF400onLanes(lanes):
-    #R = 1
     ## Round constants
     RC=[0x0000000000000001,
         0x0000000000008082,
@@ -114,90 +85,63 @@ def KeccakF400onLanes(lanes):
                 lanes[x][y] = T[x] ^((~T[(x+1)%5]) & T[(x+2)%5])
         # ι
         lanes[0][0] = lanes[0][0] ^ RC[round]%(1<<16)
-        #for j in range(7):
-        #    R = ((R << 1) ^ ((R >> 7)*0x71)) % 256
-        #    if (R & 2):
-        #        lanes[0][0] = lanes[0][0] ^ (1 << ((1<<j)-1))
     return lanes
-
-def load64(b):
-    return sum((b[i] << (8*i)) for i in range(8))  
 
 def load16(b):
     return sum((b[i] << (8*i)) for i in range(2)) 
 
-def store64(a):
-    return list((a >> (8*i)) % 256 for i in range(8))
-
 def store16(a):
     return list((a >> (8*i)) % 256 for i in range(2))
 
-def KeccakF400(state):
-    # new start
-    state1 = bytearray(50)
-    kh.KeccakF400_avx(state, state1)
-    state = state1
-    # new end
-    # original start
-    #lanes = [[load16(state[2*(x+5*y):2*(x+5*y)+2]) for y in range(5)] for x in range(5)]
-    #lanes = KeccakF400onLanes(lanes)
-    #state = bytearray(50)
-    #for x in range(5):
-    #    for y in range(5):
-    #        state[2*(x+5*y):2*(x+5*y)+2] = store16(lanes[x][y])
-    # original end
+def KeccakF400(state, useAVX = True):
+    if useAVX:
+        state1 = bytearray(50)
+        kh.KeccakF400_avx(state, state1)
+        state = state1
+    else:
+        lanes = [[load16(state[2*(x+5*y):2*(x+5*y)+2]) for y in range(5)] for x in range(5)]
+        lanes = KeccakF400onLanes(lanes)
+        state = bytearray(50)
+        for x in range(5):
+            for y in range(5):
+                state[2*(x+5*y):2*(x+5*y)+2] = store16(lanes[x][y])
     return state
 
-def KeccakF1600(state):
-    #state2 = bytearray(200)
-    #kh.KeccakF1600_avx(state, state2)
-    #state = state2
-    lanes = [[load64(state[8*(x+5*y):8*(x+5*y)+8]) for y in range(5)] for x in range(5)]
-    lanes = KeccakF1600onLanes(lanes)
-    state = bytearray(200)
-    for x in range(5):
-        for y in range(5):
-            state[8*(x+5*y):8*(x+5*y)+8] = store64(lanes[x][y])
-    return state
-
-def Keccak(rate, capacity, inputBytes, delimitedSuffix, outputByteLen):
+def Keccak(rate, capacity, inputBytes, delimitedSuffix, outputByteLen, useAVX = True):
     outputBytes = bytearray()
-    state = bytearray([0 for i in range(50)]) #change b//8
+    state = bytearray([0 for i in range(50)]) 
     rateInBytes = rate//8
     blockSize = 0
-    if (((rate + capacity) != 400) or ((rate % 8) != 0)): #change 1600 = r+c
+    if (((rate + capacity) != 400) or ((rate % 8) != 0)): 
         return
     inputOffset = 0
     # === Absorb all the input blocks ===
     while(inputOffset < len(inputBytes)):
         blockSize = min(len(inputBytes)-inputOffset, rateInBytes)
-        # new start
-        state1 = bytearray([0 for i in range(50)]) # change
-        kh.keccak_absorb( inputBytes, blockSize, state, state1, inputOffset )
-        state = state1
-        # new end
-        # original start
-        #for i in range(blockSize):
-        #    state[i] = state[i] ^ inputBytes[i+inputOffset]
-        # original end
+        if useAVX:
+            state1 = bytearray([0 for i in range(50)]) 
+            kh.keccak_absorb( inputBytes, blockSize, state, state1, inputOffset )
+            state = state1
+        else:
+            for i in range(blockSize):
+                state[i] = state[i] ^ inputBytes[i+inputOffset]
         inputOffset = inputOffset + blockSize
         if (blockSize == rateInBytes):
-            state = KeccakF400(state)
+            state = KeccakF400(state, useAVX)
             blockSize = 0
     # === Do the padding and switch to the squeezing phase ===
-    #print blockSize
     state[blockSize] = state[blockSize] ^ delimitedSuffix
     if (((delimitedSuffix & 0x80) != 0) and (blockSize == (rateInBytes-1))):
-        state = KeccakF400(state)
+        state = KeccakF400(state, useAVX)
     state[rateInBytes-1] = state[rateInBytes-1] ^ 0x80
-    state = KeccakF400(state)
+    state = KeccakF400(state, useAVX)
     # === Squeeze out all the output blocks ===
     while(outputByteLen > 0):
         blockSize = min(outputByteLen, rateInBytes)
         outputBytes = outputBytes + state[0:blockSize]
         outputByteLen = outputByteLen - blockSize
         if (outputByteLen > 0):
-            state = KeccakF400(state)
+            state = KeccakF400(state, useAVX)
     return outputBytes
 
 def SHAKE128(inputBytes, outputByteLen):
