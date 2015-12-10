@@ -7,9 +7,6 @@ from multiprocessing import Pool
 import sys, getopt
 from functools import partial
 
-# setting this globally
-K = Keccak.Keccak(400)
-
 def main(argv):
     inputfile = ''
     inputmessage = ''
@@ -18,6 +15,7 @@ def main(argv):
     h = 3 # treeHeight - performs well for file sizes 1 MB and upwards; and smaller files have much smaller runtime anyway
     d = 4 # treeDegree
     outputLength = 512 # default with SHA3-512
+    useAVX = True 
     
     try: # if both i and m are passed in, we pick m
         opts, args = getopt.getopt(argv, "ui:m:h:d:o:", ["ifile=","imessage=", "treeHeight=", "treeDegree=", "outputLength="])
@@ -44,15 +42,17 @@ def main(argv):
             assert arg.isdigit() == True, "outputLength argument expected to be an integer"
             outputLength = int(arg)
             
-    print 'Final output (tree hashing)'
+    assert inputfile != '' or inputmessage != '', "no message or file provided" 
+    
+    print 'Final output (tree hashing + AVX) - SHA3 - Keccak400'
     print '================='
 
     # Tree hash
-    print 'Height:', h
+    #print 'Height:', h
     startT = time.time()
-    tRet = treeHash(M, K, h, d, outputLength)
+    tRet = treeHash(M, h, d, outputLength, useAVX = useAVX)
     print tRet, len(tRet)*4
-    print 'H = %d time:'%h, time.time() - startT
+    #print 'H = %d time:'%h, time.time() - startT
         
 
 # http://stackoverflow.com/questions/2576712/using-python-how-can-i-read-the-bits-in-a-byte
@@ -75,12 +75,12 @@ def getMessageFromString(inputmessage):
     M = ''.join( map(str, [b for b in bits(inputmessage, message = True)]) )
     return M
 
-def workProc(hashStr, outputLength):
+def workProc(hashStr, outputLength, useAVX):
     msg = bytearray(binascii.unhexlify(hashStr))
     msg = msg[:len(msg)]
-    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8)).upper()
+    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = useAVX)).upper()
 
-def treeHash(M, K, H, D, outputLength, B = 1024):
+def treeHash(M, H, D, outputLength, B = 1024, useAVX = True):
     # Perform hashing at each layer and then concatenate
     L = D**H
     TS = sum([D**i for i in xrange(0, H+1)])
@@ -101,7 +101,7 @@ def treeHash(M, K, H, D, outputLength, B = 1024):
         tree[len(tree) - i - 1] = curB
     
     # creating a partial function to use in pool.map 
-    workProc_handler = partial(workProc, outputLength = outputLength)
+    workProc_handler = partial(workProc, outputLength = outputLength, useAVX = useAVX)
     
     for curL in range(H, -1, -1): # Work through each level of the tree in turn
         # print 'Level', curL

@@ -7,9 +7,6 @@ from multiprocessing import Pool
 import sys, getopt
 from functools import partial
 
-# setting this globally
-K = Keccak.Keccak(400)
-
 def main(argv):
     inputfile = ''
     inputmessage = ''
@@ -18,6 +15,7 @@ def main(argv):
     h = 3 # treeHeight - performs well for file sizes 1 MB and upwards; and smaller files have much smaller runtime anyway
     d = 4 # treeDegree
     outputLength = 512 # default with SHA3-512
+    useAVX = True
     
     try: # if both i and m are passed in, we pick m
         opts, args = getopt.getopt(argv, "ui:m:h:d:o:", ["ifile=","imessage=", "treeHeight=", "treeDegree=", "outputLength="])
@@ -44,35 +42,59 @@ def main(argv):
             assert arg.isdigit() == True, "outputLength argument expected to be an integer"
             outputLength = int(arg)
             
-    print 'Final output (tree hashing)'
+    assert inputfile != '' or inputmessage != '', "no message or file provided" 
+    
+    print 'Final output: SHA3 - Keccak400'
     print '================='
 
-    # Tree hash
-    #for h in xrange(0, 5):
-    print 'Height:', h
+    print 'Serial'
     startT = time.time()
-    tRet = treeHash(M, K, h, d, outputLength)
-    print tRet, len(tRet)*4
-    print 'H = %d time:'%h, time.time() - startT
+    BStr = ''.join( map(str,M) )
+    hexB = "{0:0x}".format(int(BStr, 2)) if BStr != '' else ''
+    msg = bytearray(binascii.unhexlify(hexB))
+    msg = msg[:len(msg)]
+    res = binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = False)).upper()
+    #print res
+    #print res_avx
+    #assert res == res_avx, "Not matching"
+    print res, len(res)*4
+    print 'time: ', time.time() - startT
     
     # Using normal Keccak function
     # http://stackoverflow.com/questions/3470398/list-of-integers-into-string-byte-array-python
-    print 'Final output (serial)'
-    print '================='
+    print 'AVX only'
     startT = time.time()
     BStr = ''.join( map(str,M) )
     hexB = "{0:0x}".format(int(BStr, 2)) if BStr != '' else ''
     #res = K.Keccak( (len(M), hexB), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
     msg = bytearray(binascii.unhexlify(hexB))
     msg = msg[:len(msg)]
-    res = binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, 512//8)).upper()
+    res = binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = True)).upper()
     #print res
     #print res_avx
     #assert res == res_avx, "Not matching"
     print res, len(res)*4
-    print 'Time = ', time.time() - startT
-        
-
+    print 'time: ', time.time() - startT
+    
+    # Tree hash
+    #for h in xrange(0, 5):
+    #print 'Height:', h
+    print "Tree hashing only"
+    startT = time.time()
+    tRet = treeHash(M, h, d, outputLength, useAVX = False)
+    print tRet, len(tRet)*4
+    print 'time: ', time.time() - startT
+    
+    # Tree hash
+    #for h in xrange(0, 5):
+    #print 'Height:', h
+    print "Tree hashing + AVX"
+    startT = time.time()
+    tRet = treeHash(M, h, d, outputLength, useAVX = True)
+    print tRet, len(tRet)*4
+    print 'time: ', time.time() - startT
+    
+    
 # http://stackoverflow.com/questions/2576712/using-python-how-can-i-read-the-bits-in-a-byte
 def bits(f, message = False):
     if message:
@@ -93,13 +115,12 @@ def getMessageFromString(inputmessage):
     M = ''.join( map(str, [b for b in bits(inputmessage, message = True)]) )
     return M
 
-def workProc(hashStr, outputLength):
-    #return K.Keccak((len(hashStr)*4, hashStr), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
+def workProc(hashStr, outputLength, useAVX):
     msg = bytearray(binascii.unhexlify(hashStr))
     msg = msg[:len(msg)]
-    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8)).upper()
+    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = useAVX)).upper()
 
-def treeHash(M, K, H, D, outputLength, B = 1024):
+def treeHash(M, H, D, outputLength, B = 1024, useAVX = True):
     # Perform hashing at each layer and then concatenate
     L = D**H
     TS = sum([D**i for i in xrange(0, H+1)])
@@ -120,7 +141,7 @@ def treeHash(M, K, H, D, outputLength, B = 1024):
         tree[len(tree) - i - 1] = curB
     
     # creating a partial function to use in pool.map 
-    workProc_handler = partial(workProc, outputLength = outputLength)
+    workProc_handler = partial(workProc, outputLength = outputLength, useAVX = useAVX)
     
     # startT2 = time.time()
     for curL in range(H, -1, -1): # Work through each level of the tree in turn
