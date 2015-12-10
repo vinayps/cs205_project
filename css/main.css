@@ -374,6 +374,11 @@ ul.nostyle i {
   background: #f5f5f5; 
 }
 
+#application {
+  padding: 100px 0;
+  background: #f5f5f5; 
+}
+
 #takeaways {
   padding: 100px 0;
 }
