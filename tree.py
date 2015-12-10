@@ -50,7 +50,7 @@ def main(argv):
     startT = time.time()
     BStr = ''.join( map(str,M) )
     hexB = "{0:0x}".format(int(BStr, 2)) if BStr != '' else ''
-    res = K.Keccak( (len(M), hexB) )
+    res = K.Keccak( (len(M), hexB), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
     print res, len(res)*4
     print 'Time = ', time.time() - startT
         
@@ -78,7 +78,7 @@ def getMessageFromString(inputmessage):
     return M
 
 def workProc(hashStr):
-    return K.Keccak((len(hashStr)*4, hashStr))
+    return K.Keccak((len(hashStr)*4, hashStr), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
 
 def treeHash(M, K, B = 1024, H = 2, D = 4):
     # Perform hashing at each layer and then concatenate
