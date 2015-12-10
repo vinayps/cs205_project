@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Why is my flight delayed? | CS 109 Project 2015</title>
+	<!-- core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/animate.min.css" rel="stylesheet">
+    <link href="css/owl.carousel.css" rel="stylesheet">
+    <link href="css/owl.transitions.css" rel="stylesheet">
+    <link href="css/prettyPhoto.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->       
+    <link rel="shortcut icon" href="images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+</head><!--/head-->
+
+<body id="home" class="homepage">
+
+    <header id="header">
+        <nav id="main-menu" class="navbar navbar-default navbar-fixed-top" role="banner">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo"></a>
+                </div>
+				
+                <div class="collapse navbar-collapse navbar-right">
+                    <ul class="nav navbar-nav">
+                        <li class="scroll active"><a href="#home">Home</a></li>                      
+                        <li class="scroll"><a href="#meet-team">Team</a></li>
+                        <li class="scroll"><a href="#bg-motivation">Background</a></li>
+                        <li class="scroll"><a href="#data">Data</a></li> 
+                        <li class="scroll"><a href="#portfolio">Analysis</a></li>                      
+                        <li class="scroll"><a href="#prediction">Prediction</a></li> 
+                        <li class="scroll"><a href="https://github.com/LeonhardFS/flightbbq" target="_blank">Download</a></li> 
+                    </ul>
+                </div>
+            </div><!--/.container-->
+        </nav><!--/nav-->
+    </header><!--/header-->
+
+    <section id="main-slider">
+        <div class="owl-carousel">
+            <div class="item" style="background-image: url(images/slider/bg1.png);">
+                <div class="slider-inner">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-6">                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!--/.item-->
+            <div class="item" style="background-image: url(images/slider/bg2.jpg);">
+                <div class="slider-inner">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-6">                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!--/.item-->
+    </section><!--/#main-slider-->
+
+   <section id="meet-team">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Meet The Team</h2>                
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6 col-md-3 col-md-offset-3">
+                    <div class="team-member wow fadeInUp" data-wow-duration="400ms" data-wow-delay="0ms">
+                        <div class="team-img">
+                            <img class="img-responsive" src="images/team/vinay.jpg" alt="">
+                        </div>
+                        <div class="team-info">
+                            <h3>Vinay</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="team-member wow fadeInUp" data-wow-duration="400ms" data-wow-delay="100ms">
+                        <div class="team-img">
+                            <img class="img-responsive" src="images/team/victor.jpg" alt="">
+                        </div>
+                        <div class="team-info">
+                            <h3>Victor</h3>
+                        </div>                    
+                    </div>
+                </div>
+        
+    </section><!--/#meet-team-->
+    <section id="bg-motivation">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Background and motivation</h2>
+                <p class="text-left wow fadeInDown">
+                    Our project is motivated by the following facts:
+                    <ul class="text-left wow fadeInDown">
+                        <li>Flight delays are an issue for many business and official travellers. Over the years, some airports such as Washington Dulles, DC have earned a reputation for being unreliable. Based on the data, we want to explore whether these reputations are deserved. </li>
+                        <li>There is extensive official data on the topic of flight delays. More than 8 million commercial flights are operated every year in the US. For each of these flight, information such as date, weather conditions, airline carrier, departure and arrival airports are freely available.</li>
+                        <li>Numerous charts can be plotted. For example, what is the link between the political color of a given state and its performance against the national average in terms of flight delays? How about the relationship between airport location and city center (as given by Google Maps)?</li>
+                    </ul>
+                </p>
+
+                <p class="text-left wow fadeInDown">
+                    We are pursuing two objectives:
+                    <ul class="text-left wow fadeInDown">
+                    <li><h4 class="media-heading">Predictive inference</h4> Our aim is to build a delay estimator. Inputs are the airline carrier, the departure airport, the destination airport, the time and date of the flight, weather, and other variables deemed relevant by a statistical analysis. Output is the expected delay. Thanks to the high volume of data, we might even achieve a probability density function for the delay. This would require statistical tools such as non-parametric kernel estimation, linear and nonlinear regressions. As for computations, the large amount of data would require to use cloud services such as Amazon Web Services.</li>
+
+                    <li>
+                    <h4 class="media-heading">Explicative inference</h4> Understand what causes delays. Do some airports systematically generate delays independently of the company? What is the influence of seasonality? Is there a state factor? 
+                    </li>
+
+                </p>
+            </div>            
+        </div>
+    </section>
+
+
+    <section id="data">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Data</h2>
+                <p class="text-left wow fadeInDown">
+                    Since 1987 the U.S. Department of Transportation (US DOT) collects a huge amount of domestic flight data. This dataset, containing many different features (e.g. timestamp, origin, destination, airline, delays, etc.), is publicly available on <a href="http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236" target="_blank">their website</a>. The tool on their website allows for downloading a customized dataset based on selected features and a specific time period. Each month there are more than 400,000 recorded flights, so we have to deal with very big datasets.
+                </p>
+                <p class="text-left wow fadeInDown">
+                    For this project, we decided to focus mostly on the 2014 data since otherwise the dataset was just far too large. We were also able to connect this dataset with external weather data that affects flight delays.
+                </p>
+            </div>            
+        </div>
+    </section>
+
+    <section id="animated-number">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Speedup</h2>
+                <p class="text-center wow fadeInDown">Some quick statstics about performance with AVX and tree hashing.</p>
+            </div>
+
+            <div class="row text-center">
+                <div class="col-sm-4 col-xs-6">
+                    <div class="wow fadeInUp" data-wow-duration="400ms" data-wow-delay="0ms">
+                        <div class="animated-number" data-digit="30" data-duration="1000"></div>
+                        <strong>AVX (%)</strong>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-xs-6">
+                    <div class="wow fadeInUp" data-wow-duration="400ms" data-wow-delay="100ms">
+                        <div class="animated-number" data-digit="40" data-duration="1000"></div>
+                        <strong>TREE HASHING (%)</strong>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-xs-6">
+                    <div class="wow fadeInUp" data-wow-duration="400ms" data-wow-delay="300ms">
+                        <div class="animated-number" data-digit="325" data-duration="1000"></div>
+                        <strong>AVX + TREE HASHING (%)</strong>
+                    </div>
+                </div>                             
+            </div>
+        </div>
+    </section><!--/#animated-number-->
+
+    <section id="portfolio">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Analysis</h2>
+                <p class="text-center wow fadeInDown">By processing the data in Python and Pandas, we can come up with some interesting results about which airports and airlines have the greatest average delay. We also consider which routes are notoriously bad for delays, and select a few special delays (like late aircraft arrival delay, and weather delay) to see which airlines or airports are most susceptible to those delays.</p>
+            </div>
+
+            <div class="text-center">
+                <ul class="portfolio-filter">
+                    <li><a class="active" href="#" data-filter="*">All groups</a></li>
+                    <li><a href="#" data-filter=".tree">Tree hashing</a></li>
+                    <li><a href="#" data-filter=".avx">AVX</a></li>
+                </ul><!--/#portfolio-filter-->
+            </div>
+
+            <div class="portfolio-items">
+                <div class="portfolio-item tree">
+                    <div class="portfolio-item-inner">
+                        <img class="img-responsive" src="images/results/tree-hashing.png" alt="">
+                        <div class="portfolio-info">
+                            <h3>Tree-hashing results</h3>
+                            Graph
+                            <a class="preview" href="images/results/tree-hashing.png" rel="prettyPhoto"><i class="fa fa-eye"></i></a>
+                        </div>
+                    </div>
+                </div><!--/.portfolio-item-->
+
+                <div class="portfolio-item tree">
+                    <div class="portfolio-item-inner">
+                        <img class="img-responsive" src="images/results/tree-hashing-table.jpg" alt="">
+                        <div class="portfolio-info">
+                            <h3>Tree hashing results</h3>
+                            Table
+                            <a class="preview" href="images/results/tree-hashing-table.jpg" rel="prettyPhoto"><i class="fa fa-eye"></i></a>
+                        </div>
+                    </div>
+                </div><!--/.portfolio-item-->
+            </div>
+
+        </div><!--/.container-->
+    </section><!--/#portfolio-->
+
+    <section id="results">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Results</h2>
+                <p class="text-left wow fadeInDown">
+                    AVX results
+                </p>
+                <p class="text-left wow fadeInDown">
+                    Tree hashing results
+                </p>
+            </div>            
+        </div>
+    </section>
+
+    <section id="insights">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Insights and improvements</h2>
+                <p class="text-left wow fadeInDown">
+                    What interesting insights did you gain from this project?
+                </p>
+                <p class="text-left wow fadeInDown">
+                    What extensions and improvements can you suggest?
+                </p>
+            </div>            
+        </div>
+    </section>
+
+    <section id="takeaways">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title text-center wow fadeInDown">Takeaways</h2>
+                <p class="text-left wow fadeInDown">
+                    Text goes here.
+                </p>
+                <p class="text-left wow fadeInDown">
+                    More text goes here.
+                </p>
+            </div>            
+        </div>
+    </section>
+
+
+    
+    <footer id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    &copy; 2015 BBQ. Website template "Multi" by <a target="_blank" href="http://shapebootstrap.net/" title="Free Twitter Bootstrap WordPress Themes and HTML templates">ShapeBootstrap</a>
+                </div>                
+            </div>
+        </div>
+    </footer><!--/#footer-->
+
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/mousescroll.js"></script>
+    <script src="js/smoothscroll.js"></script>
+    <script src="js/jquery.prettyPhoto.js"></script>
+    <script src="js/jquery.isotope.min.js"></script>
+    <script src="js/jquery.inview.min.js"></script>
+    <script src="js/wow.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
