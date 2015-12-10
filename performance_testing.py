@@ -1,5 +1,4 @@
-import Keccak
-import CompactFIPS202_mod
+import Keccakf400_AVX_FIPS202
 import array
 import time
 import binascii
@@ -53,7 +52,7 @@ def main(argv):
     hexB = "{0:0x}".format(int(BStr, 2)) if BStr != '' else ''
     msg = bytearray(binascii.unhexlify(hexB))
     msg = msg[:len(msg)]
-    res = binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = False)).upper()
+    res = binascii.hexlify(Keccakf400_AVX_FIPS202.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = False)).upper()
     #print res
     #print res_avx
     #assert res == res_avx, "Not matching"
@@ -69,7 +68,7 @@ def main(argv):
     #res = K.Keccak( (len(M), hexB), 144, 256, 0x06, 512, False) # r = 144, c = 256, suffix = 0x06, n (output) = 512
     msg = bytearray(binascii.unhexlify(hexB))
     msg = msg[:len(msg)]
-    res = binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = True)).upper()
+    res = binascii.hexlify(Keccakf400_AVX_FIPS202.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = True)).upper()
     #print res
     #print res_avx
     #assert res == res_avx, "Not matching"
@@ -118,7 +117,7 @@ def getMessageFromString(inputmessage):
 def workProc(hashStr, outputLength, useAVX):
     msg = bytearray(binascii.unhexlify(hashStr))
     msg = msg[:len(msg)]
-    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = useAVX)).upper()
+    return binascii.hexlify(Keccakf400_AVX_FIPS202.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = useAVX)).upper()
 
 def treeHash(M, H, D, outputLength, B = 1024, useAVX = True):
     # Perform hashing at each layer and then concatenate

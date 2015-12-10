@@ -7,12 +7,9 @@
 # http://creativecommons.org/publicdomain/zero/1.0/
 
 import binascii
-import CompactFIPS202_mod
-import CompactFIPS202
+import Keccakf400_AVX_FIPS202
+#import CompactFIPS202
 import os
-import sys
-import os.path
-sys.path.append(os.path.join('.', 'util'))
 from timer import Timer 
 import Keccak
     
@@ -20,7 +17,7 @@ import Keccak
 ## test vectors and compare the computed values to the provided ones
 ## In case of difference, it stops the processing and print a message
 
-dirTestVector=os.path.abspath(os.path.join('.'))
+dirTestVector=os.path.abspath(os.path.join('./Test_Files'))
 verbose=False
 instances=[
     ['SHAKE128', 336, 64, 0x1F, 0], # 1344, 256
@@ -81,7 +78,7 @@ with Timer() as t:
                             #print Len
                             # Perform our own computation
                             #computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
-                            computed = CompactFIPS202_mod.Keccak(r, c, msg, delimitedSuffix, n//8, useAVX = True)
+                            computed = Keccakf400_AVX_FIPS202.Keccak(r, c, msg, delimitedSuffix, n//8, useAVX = True)
                             #print binascii.hexlify(computed)
                             #Compare the results
                             reference = myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, (len(MD_ref)//2)*8, False)

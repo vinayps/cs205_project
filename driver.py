@@ -1,5 +1,4 @@
-import Keccak
-import CompactFIPS202_mod
+import Keccakf400_AVX_FIPS202
 import array
 import time
 import binascii
@@ -78,7 +77,7 @@ def getMessageFromString(inputmessage):
 def workProc(hashStr, outputLength, useAVX):
     msg = bytearray(binascii.unhexlify(hashStr))
     msg = msg[:len(msg)]
-    return binascii.hexlify(CompactFIPS202_mod.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = useAVX)).upper()
+    return binascii.hexlify(Keccakf400_AVX_FIPS202.Keccak(144, 256, msg, 0x06, outputLength//8, useAVX = useAVX)).upper()
 
 def treeHash(M, H, D, outputLength, B = 1024, useAVX = True):
     # Perform hashing at each layer and then concatenate
