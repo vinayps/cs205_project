@@ -30,8 +30,10 @@ def main(argv):
             
     fM1, fM2 = None, None
 
-    print 'Final output'
+    print 'Final output (tree hashing)'
     print '================='
+
+    # print M
 
     # Tree hash
     for h in xrange(0, 5):
@@ -39,14 +41,15 @@ def main(argv):
         startT = time.time()
         tRet = treeHash(M, K, H=h)
         print tRet, len(tRet)*4
-        print 'Time = ', time.time() - startT
+        print 'H = %d time:'%h, time.time() - startT
     
     # Using normal Keccak function
     # http://stackoverflow.com/questions/3470398/list-of-integers-into-string-byte-array-python
+    print 'Final output (serial)'
+    print '================='
     startT = time.time()
     BStr = ''.join( map(str,M) )
-    hexB = "{0:0x}".format(int(BStr, 2))
-    # print 'Equal?', (hexB == fM1)
+    hexB = "{0:0x}".format(int(BStr, 2)) if BStr != '' else ''
     res = K.Keccak( (len(M), hexB) )
     print res, len(res)*4
     print 'Time = ', time.time() - startT
@@ -83,19 +86,12 @@ def treeHash(M, K, B = 1024, H = 2, D = 4):
     TS = sum([D**i for i in xrange(0, H+1)])
     curIdx = TS
     tree = [None for i in xrange(TS)]
-    print 'Message:', len(M)
 
-    # Get message into the leaves of the tree
+    # Initialize the leaves
     for i in xrange(0, L):
         tree[len(tree) - i - 1] = []
 
-    # for i in xrange(0, len(M)):
-    #     # if i%100000 == 0:
-    #     #     print i
-    #
-    #     j = int(i/B) % L
-    #     tree[len(tree) - L + j].append(M[i])
-
+    # Get message into the leaves of the tree
     nGroups = len(M)/B + (len(M)%B != 0)
     for i in xrange(0, nGroups):
         tree[len(tree) - L + i%L].append(M[i*B: (i+1)*B])
@@ -103,19 +99,13 @@ def treeHash(M, K, B = 1024, H = 2, D = 4):
 
     for i in xrange(0, L):
         curB = ''.join(tree[len(tree) - i - 1])
-        if len(curB) % B != 0: # Add padding if not a multiple of B
-            tree[len(tree) - i - 1] = (B - len(curB)) * '0' + curB
-        else:
-            tree[len(tree) - i - 1] = curB
+        tree[len(tree) - i - 1] = curB
     
-    startT2 = time.time()
-    for curL in range(H, -1, -1):
-        print 'Level', curL
+    # startT2 = time.time()
+    for curL in range(H, -1, -1): # Work through each level of the tree in turn
+        # print 'Level', curL
         curN = D**curL
         curIdx -= curN
-
-        # if curL == 0:
-        #     print len(tree[0])
 
         # Hash nodes on this level in parallel
         p = Pool(4)
@@ -127,13 +117,11 @@ def treeHash(M, K, B = 1024, H = 2, D = 4):
 
                 tree[i] = ''.join(tree[i])
             else:
-                tree[i] = "{0:0{1}x}".format(int(tree[i], 2), len(tree[i])/4)
+                if tree[i] != '':
+                    tree[i] = "{0:0{1}x}".format(int(tree[i], 2), len(tree[i])/4)
 
-        # if curL == 0:
-        #     global fM1
-        #     fM1 = tree[0]
         tree[curIdx: curIdx+curN] = p.map(workProc, tree[curIdx: curIdx+curN])
-    print time.time() - startT2
+    # print 'H = %d time:'%H, time.time() - startT2
     return tree[0]
 
 
