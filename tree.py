@@ -20,11 +20,11 @@ def main(argv):
     try: # if both i and m are passed in, we pick m
         opts, args = getopt.getopt(argv, "ui:m:h:d:o:", ["ifile=","imessage=", "treeHeight=", "treeDegree=", "outputLength="])
     except getopt.GetoptError:
-        print 'tree.py -i <inputfile> \ntest.py -m <inputmessage>'
+        print 'tree.py -i <inputfile> -h 3 -d 4 -o 512\ntree.py -m <inputmessage> -h 3 -d 4 -o 512'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-u': #usage
-            print 'tree.py -i <inputfile> \ntest.py -m <inputmessage>'
+            print 'tree.py -i <inputfile> -h 3 -d 4 -o 512\ntree.py -m <inputmessage> -h 3 -d 4 -o 512'
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
