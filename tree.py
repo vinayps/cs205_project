@@ -1,28 +1,83 @@
-import sha3
+#import sha3
 import Keccak
-import KeccakError
+#import KeccakError
 import array
 import time
 from multiprocessing import Pool
+import sys, getopt
+
+# setting this globally
+K = Keccak.Keccak(400)
+
+def main(argv):
+    inputfile = ''
+    inputmessage = ''
+    try:
+        opts, args = getopt.getopt(argv, "hi:m:", ["ifile=","imessage="])
+    except getopt.GetoptError:
+        print 'tree.py -i <inputfile> \ntest.py -m <inputmessage>'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'tree.py -i <inputfile> \ntest.py -m <inputmessage>'
+            sys.exit()
+        elif opt in ("-i", "--ifile"):
+            inputfile = arg
+            M = getMessageFromFile(inputfile)
+        elif opt in ("-m", "--imessage"):
+            inputmessage = arg
+            M = getMessageFromString(inputmessage)
+            
+    fM1, fM2 = None, None
+
+    print 'Final output'
+    print '================='
+
+    # Tree hash
+    for h in xrange(0, 5):
+        print 'Height:', h
+        startT = time.time()
+        tRet = treeHash(M, K, H=h)
+        print tRet, len(tRet)*4
+        print 'Time = ', time.time() - startT
+    
+    # Using normal Keccak function
+    # http://stackoverflow.com/questions/3470398/list-of-integers-into-string-byte-array-python
+    startT = time.time()
+    BStr = ''.join( map(str,M) )
+    hexB = "{0:0x}".format(int(BStr, 2))
+    # print 'Equal?', (hexB == fM1)
+    res = K.Keccak( (len(M), hexB) )
+    print res, len(res)*4
+    print 'Time = ', time.time() - startT
+        
 
 # http://stackoverflow.com/questions/2576712/using-python-how-can-i-read-the-bits-in-a-byte
-def bits(f):
-    bytes = (ord(b) for b in f.read())
+def bits(f, message = False):
+    if message:
+        bytes = (ord(b) for b in f)
+    else:
+        bytes = (ord(b) for b in f.read())
     for b in bytes:
         for i in reversed(xrange(8)):
             yield (b >> i) & 1
 
-f = open('100KB.bin', 'r')
-M = ''.join( map(str, [b for b in bits(f)]) )
-f.close()
-K = Keccak.Keccak(1600)
+def getMessageFromFile(inputfile):
+    f = open(inputfile, 'r') # '100KB.bin'
+    M = ''.join( map(str, [b for b in bits(f)]) )
+    f.close()
+    return M
 
-fM1, fM2 = None, None
+def getMessageFromString(inputmessage):
+    #f = open(inputfile, 'r') # '100KB.bin'
+    M = ''.join( map(str, [b for b in bits(inputmessage, message = True)]) )
+    #f.close()
+    return M
 
 def workProc(hashStr):
     return K.Keccak((len(hashStr)*4, hashStr))
 
-def treeHash(M, B = 1024, H = 2, D = 4):
+def treeHash(M, K, B = 1024, H = 2, D = 4):
     # Perform hashing at each layer and then concatenate
     L = D**H
     TS = sum([D**i for i in xrange(0, H+1)])
@@ -52,7 +107,7 @@ def treeHash(M, B = 1024, H = 2, D = 4):
             tree[len(tree) - i - 1] = (B - len(curB)) * '0' + curB
         else:
             tree[len(tree) - i - 1] = curB
-
+    
     startT2 = time.time()
     for curL in range(H, -1, -1):
         print 'Level', curL
@@ -81,27 +136,6 @@ def treeHash(M, B = 1024, H = 2, D = 4):
     print time.time() - startT2
     return tree[0]
 
-print 'Final output'
-print '================='
 
-
-for h in xrange(0, 5):
-    print 'Height:', h
-    startT = time.time()
-    tRet = treeHash(M, H=h)
-    print tRet, len(tRet)*4
-    print 'Time = ', time.time() - startT
-
-# Using normal Keccak function
-
-# http://stackoverflow.com/questions/3470398/list-of-integers-into-string-byte-array-python
-startT = time.time()
-BStr = ''.join( map(str,M) )
-hexB = "{0:0x}".format(int(BStr, 2))
-# print 'Equal?', (hexB == fM1)
-res = K.Keccak( (len(M), hexB) )
-print res, len(res)*4
-print 'Time = ', time.time() - startT
-
-
-
+if __name__ == "__main__":
+    main(sys.argv[1:])
