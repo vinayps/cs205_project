@@ -45,50 +45,53 @@ def delimitedSuffixInBinary(delimitedSuffix):
 
 with Timer() as t:
 
-    for instance in instances:
-        [fileNameSuffix, r, c, delimitedSuffix, n] = instance
-        for fileType in fileTypes:
-            print('Processing file: %sMsgKAT_%s.txt...' % (fileType, fileNameSuffix))
-            print("Keccak[r=%d, c=%d] with '%s' suffix" % (r, c, delimitedSuffixInBinary(delimitedSuffix)))
+    for i in range(1):
+        for instance in instances:
+            [fileNameSuffix, r, c, delimitedSuffix, n] = instance
+            for fileType in fileTypes:
+                print('Processing file: %sMsgKAT_%s.txt...' % (fileType, fileNameSuffix))
+                print("Keccak[r=%d, c=%d] with '%s' suffix" % (r, c, delimitedSuffixInBinary(delimitedSuffix)))
 
-            #Open the corresponding file
-            try:
-                referenceFile=open(os.path.join(dirTestVector,fileType+('MsgKAT_%s.txt' % fileNameSuffix)), 'r')
-            except IOError:
-                print("Error: test vector files must be stored in %s" % (dirTestVector))
-                exit()
+                #Open the corresponding file
+                try:
+                    referenceFile=open(os.path.join(dirTestVector,fileType+('MsgKAT_%s.txt' % fileNameSuffix)), 'r')
+                except IOError:
+                    print("Error: test vector files must be stored in %s" % (dirTestVector))
+                    exit()
 
-            #Parse the document line by line (works only for Short and Long files)
-            for line in referenceFile:
-                if line.startswith('Len'):
-                    Len=int(line.split(' = ')[1].strip('\n\r'))
-                if line.startswith('Msg'):
-                    Msg=line.split(' = ')[1].strip('\n\r')
-                    msg = bytearray(binascii.unhexlify(Msg))
-                    msg = msg[:Len//8]
-                if (line.startswith('MD') or line.startswith('Squeezed')):
-                    MD_ref=line.split(' = ')[1].strip('\n\r')
-                    reference = bytearray(binascii.unhexlify(MD_ref))
-                    # If line starts with 'Squeezed', use the output length from the test vector
-                    if line.startswith('Squeezed'):
-                        n = len(reference)*8
-                    elif n == 0:
-                        print("Error: the output length should be specified")
-                        exit()
-
-                    if ((Len % 8) == 0 and Len > 100 ): #and ( Len == 1992 )): # greater than 100 is my addition
-                        #print Len
-                        # Perform our own computation
-                        #computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
-                        computed = CompactFIPS202_mod.Keccak(r, c, msg, delimitedSuffix, n//8)
-                        #Compare the results
-                        reference = myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, (len(MD_ref)//2)*8, False)
-                        if (binascii.hexlify(computed).upper() != reference):
-                            print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, reference, binascii.hexlify(computed))) # binascii.hexlify(reference)
+                #Parse the document line by line (works only for Short and Long files)
+                for line in referenceFile:
+                    if line.startswith('Len'):
+                        Len=int(line.split(' = ')[1].strip('\n\r'))
+                    if line.startswith('Msg'):
+                        Msg=line.split(' = ')[1].strip('\n\r')
+                        msg = bytearray(binascii.unhexlify(Msg))
+                        msg = msg[:Len//8]
+                    if (line.startswith('MD') or line.startswith('Squeezed')):
+                        MD_ref=line.split(' = ')[1].strip('\n\r')
+                        reference = bytearray(binascii.unhexlify(MD_ref))
+                        # If line starts with 'Squeezed', use the output length from the test vector
+                        if line.startswith('Squeezed'):
+                            n = len(reference)*8
+                        elif n == 0:
+                            print("Error: the output length should be specified")
                             exit()
-        
-            print("OK\n")
-            referenceFile.close()
+
+                        if ((Len % 8) == 0 and ( Len == 104 )): 
+                            print Len
+                            # Perform our own computation
+                            #computed = CompactFIPS202.Keccak(r, c, msg, delimitedSuffix, n//8)
+                            computed = CompactFIPS202_mod.Keccak(r, c, msg, delimitedSuffix, n//8)
+                            print binascii.hexlify(computed)
+                            #Compare the results
+                            reference = myKeccak.Keccak((Len,Msg), r, c, delimitedSuffix, (len(MD_ref)//2)*8, False)
+                            print reference
+                            if (binascii.hexlify(computed).upper() != reference):
+                                print('ERROR: \n\t type=%s\n\t length=%d\n\t message=%s\n\t reference=%s\n\t computed=%s' % (fileNameSuffix, Len, Msg, reference, binascii.hexlify(computed))) # binascii.hexlify(reference)
+                                exit()
+
+                print("OK\n")
+                referenceFile.close()
             
 seconds = t.interval
 print("Total time taken (seconds) = %s" %(seconds))
