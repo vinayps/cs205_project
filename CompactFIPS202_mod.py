@@ -14,7 +14,6 @@
 
 import sys
 import os.path
-sys.path.append(os.path.join('..', 'util'))
 import numpy as np
 import set_compiler
 set_compiler.install()
