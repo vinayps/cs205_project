@@ -8,9 +8,9 @@ We have specifically implemented this for Keccak-f(400).
 ## Usage 
 1) To apply SHA3-Keccakf-400 on a message, one can directly use **driver.py** This program takes a number of command line inputs - 
 
-driver.py -i <inputfile> -h 3 -d 4 -o 512 
+driver.py -i [inputfile] -h 3 -d 4 -o 512 
 
-driver.py -m <inputmessage> -h 3 -d 4 -o 512
+driver.py -m [inputmessage] -h 3 -d 4 -o 512
 
   Argument details - 
 - -i: input file
