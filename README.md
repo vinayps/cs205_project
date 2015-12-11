@@ -5,6 +5,24 @@ Parallel implementation of SHA3 - Keccakf(400)
 The goal of this project is to develop a parallel implementation of the SHA3-Keccak algorithm. We have taken two approaches to doing this - multi-core/multi-thread CPU parallelism and instruction-level parallelism (SIMD - AVX/AVX2). By combining both approaches hierarchically, we get speed ups of between 3x to 4x depending on the size of the input message (larger the message, greater the speedup). 
 We have specifically implemented this for Keccak-f(400). 
 
+## Content
+1. Code - 
+  1. AVX.h - AVX functions to be used are defined
+  2. AVX.pxd - AVX functions are exposed to cython
+  3. AVX_test.py - Test harness to test AVX implementation
+  4. CompactFIPS202.py - Original serial implementation for Keccakf(1600) (derived from references)
+  5. Keccak.py - Keccak class definitions for second independent serial implementation (derived from references)
+  6. Keccak_Helper.pyx - Helper functions in cython implementing actual AVX operations
+  7. Keccakf400_AVX_FIPS202.py - Implementation of Keccakf(400) that leverages AVX through cython
+  8. avxintrin-emu.h - header with exhaustive set of AVX intrinsics
+  9. driver.py - primary script; tree hashing functions are also implemented here
+  10. performance_testing.py - primary performance testing script; all testing possibilities are enumerated; tree hashing functions are also implemented here
+  11. set_compiler.py - utility script to set the right compiler for various environments (especially required for Mac users)
+  12. timer.py - utility wrapper that makes timer functions easily accessible
+2. Test_files 
+  1. *.bin - various synthetically generated binary data files used in performance testing; generated using: head -c 1024 \</dev/urandom \>myfile
+  2. Short* - hexadecimal strings of various lengths used by AVX_test to check for accuracy of the AVX implementation
+
 ## Usage 
 1) To apply SHA3-Keccakf-400 on a message, one can directly use **driver.py** This program takes a number of command line inputs - 
 
