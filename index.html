@@ -246,7 +246,16 @@
             <div class="section-header">
                 <h2 class="section-title text-center wow fadeInDown">Results</h2>
                 <h3>AVX results</h3>
-                <p class="text-left wow fadeInDown"></p>
+                <p class="text-left wow fadeInDown">
+                	Results - 45% speed up. Used AVX in many of the compute intensive parts of the code. We didnt convert the whole thing to AVX so some overhead in serializing back and forth. Also, a lot of the operations didnt lend themselves to an 8 way parallel effort - in fact, in many cases only 5 of the registers were in use.
+One of the most compute intensive parts that we didnt AVX was bit rotation (also called circular shifts). Incidentally, starting with AVX512, circular shifts become intrinsic operations. In fact, even today, in other SIMD instruction sets, like those offered by AMD this is a feature but not on our Intel chips. 
+The other challenge was figuring out the correct data type conversions between Python and Cython/C/AVX types. As we are dealing with bit strings, hexadecimal strings, bytearrays, char strings and arrays and most importantly going back and forth between a weakly typed language like Python and a strongly typed one like C, it was difficult. Also dealing with more complex Python objects like lists and their conversions to more primitive types was challenging. 
+Finally, one other challenge related to both the previous ones was the fact that Python integers seemed to have a much higher value range than long integers in C. And we are fundamentally limited by 256 bit registers in AVX, and so to store 8 values, each can at max be of 32 bits in length. This meant that some of the larger bit shifts (bit shifting by 64) were hard without a lot of tedious and mistake-prone type conversions. And hence, our choice of implementing Keccakf(400). In this case, the width of the hashing function is only 400 and not 1600 like in the original implementation. This meant that the max bit shift that we had to deal with was only shifts by 16! 
+Thus, overall, leveraging AVX for this application, although rewarding was extremely challenging. One definite takeaway (and our TA advisor did hint at this) is to implement completely in C without dealing with the challenges of going back and forth with Python. 
+AVX also produced substantial gains in performance (40-50% time reduction) despite all of the type conversions, serializing, and the fact that it wasnt all done in AVX.
+Implementation - We started off using the AVX framework that we had available to us. We then extended it by adding functions that we needed like the ability to permute in place, bit shifts, and integer operations in general as opposed to the floating point operations from earlier. Since, we werent converting the entire script to AVX due to above challenges, we had to identify the appropriate areas to parallelize and carefully choose compute intensive areas that could benefit from this parallelization. We also ensured that we tested continuously using other independent implementations as checking the correctness of the algorithm is impossible without a reference (correct and incorrect hashes of the same size are not obviously different). 
+
+                </p>
                 </p>
                 </p>
                 <h3>Tree hashing results</h3>
