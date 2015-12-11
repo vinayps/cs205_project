@@ -20,15 +20,16 @@ We have specifically implemented this for Keccak-f(400).
   11. set_compiler.py - utility script to set the right compiler for various environments (especially required for Mac users)
   12. timer.py - utility wrapper that makes timer functions easily accessible
 2. Test_files 
-  1. *.bin - various synthetically generated binary data files used in performance testing; generated using: head -c 1024 \</dev/urandom \>myfile
+  1. *.bin - various synthetically generated binary data files used in performance testing; generated using: 
+``` head -c 1024 </dev/urandom>myfile ```
   2. Short* - hexadecimal strings of various lengths used by AVX_test to check for accuracy of the AVX implementation
 
 ## Usage 
 1) To apply SHA3-Keccakf-400 on a message, one can directly use **driver.py** This program takes a number of command line inputs - 
-
-driver.py -i [inputfile] -h 3 -d 4 -o 512 
-
-driver.py -m [inputmessage] -h 3 -d 4 -o 512
+```
+driver.py -i <inputfile> -h 3 -d 4 -o 512 
+driver.py -m <inputmessage> -h 3 -d 4 -o 512
+```
 
   Argument details - 
 - -i: input file
