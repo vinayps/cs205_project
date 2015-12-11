@@ -106,7 +106,8 @@ Total time taken (seconds) = 33.1799860001
 ```
 
 ## References - 
-1. The base line code in this package essentially consists of two serial implementations of Keccak-f. These were derived from https://github.com/gvanas/KeccakCodePackage (keccak.noekeon.org) who had very kindly licensed this to the public domain. These were built on the standards specified in the FIPS 202 (SHA-3) document issued by csrc.nist.gov - http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf and http://csrc.nist.gov/publications/PubsFIPS.html
+1. The base line code in this package essentially consists of two serial implementations of Keccak-f. These were derived from https://github.com/gvanas/KeccakCodePackage (keccak.noekeon.org) who had very kindly licensed this to the public domain. These were built on the standards specified in the FIPS 202 (SHA-3) reference document issued by csrc.nist.gov at http://csrc.nist.gov/publications/PubsFIPS.html 
+  1. FIPS PUB 202 - SHA-3 Standard:Permutation-Based Hash and Extendable-Output Functions (August 2015), http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf 
 2. Introduction to Keccak - http://www.drdobbs.com/security/keccak-the-new-sha-3-encryption-standard/240154037?pgno=1
 3. AVX/AVX2 Intrinsics
   1. https://software.intel.com/sites/landingpage/IntrinsicsGuide/#
