@@ -113,6 +113,8 @@ Total time taken (seconds) = 33.1799860001
   2. https://software.intel.com/en-us/node/513925
 4. AVX tutorial - http://www.codeproject.com/Articles/874396/Crunching-Numbers-with-AVX-and-AVX
 5. Sponge functions - http://sponge.noekeon.org/
-6. Tree Hashing - ??
+6. Tree Hashing - Bertoni, Guido, et al. "Sakura: a flexible coding for tree hashing." Applied Cryptography and Network Security. Springer International Publishing, 2014
+7. Tree Hashing - Lowden, Jason Michael. "Analysis of KECCAK Tree Hashing on GPU Architectures." (2014).
+8. Tree Hashing - Cayrel, Pierre-Louis, Gerhard Hoffmann, and Michael Schneider. "GPU implementation of the Keccak Hash function family." Information Security and Assurance. Springer Berlin Heidelberg, 2011. 33-42.
 
 
