@@ -37,15 +37,72 @@ driver.py -m [inputmessage] -h 3 -d 4 -o 512
 - -d: degree of tree for tree hashing - this argument influences the speed up offered by tree hashing and an optimal value depends on the size of the input message; default values are provided for this argument
 - -o: length of output message digest in bits - for the typical SHA3-512, this argument will take the value 512; default value for this argument is 512 bits
 
+```
+user$ python driver.py -i ../Test_files/100KB.bin -h 3 -d 4 -o 512
+Compiling with /usr/local/bin/clang-omp
+Final output (tree hashing + AVX) - SHA3 - Keccak400
+=================
+30A0A704CE528751D3379B84A1AD2C1B27B61B40F06317ECC8342D392922A6B214C2DFDDC9C3E5C995CF0E11B4AAFB1785EBA9AB85686FAA86136E7D6C68DE59 512
+```
+
 2) To study the performance improvements provided by our implementation, on can run **performance_testing.py** This program takes the same inputs as the **driver.py** program as command line arguments. It hashes the input message and provides the output and running time using all four possibilities - 
-- Naive serial
-- Only Tree Hashing
-- Only AVX
-- Tree Hashing + AVX
+- Serial
+- AVX only
+- Tree hashing only
+- Tree hashing + AVX
+
+```
+user$ python performance_testing.py -i ../Test_files/100KB.bin -h 3 -d 4 -o 512
+Compiling with /usr/local/bin/clang-omp
+Final output: SHA3 - Keccak400
+=================
+Serial
+6FF18BF2333448B36CCEDF815766100EF6C2BDA08F72A3E24AD22E05C4B0159DC12E8B988F64FAB2F34AC3D07C981CEF43DF7E9CA93EC5AF81653ECEDC00AB1A 512
+time:  8.02229189873
+AVX only
+6FF18BF2333448B36CCEDF815766100EF6C2BDA08F72A3E24AD22E05C4B0159DC12E8B988F64FAB2F34AC3D07C981CEF43DF7E9CA93EC5AF81653ECEDC00AB1A 512
+time:  4.54654216766
+Tree hashing only
+30A0A704CE528751D3379B84A1AD2C1B27B61B40F06317ECC8342D392922A6B214C2DFDDC9C3E5C995CF0E11B4AAFB1785EBA9AB85686FAA86136E7D6C68DE59 512
+time:  4.92956495285
+Tree hashing + AVX
+30A0A704CE528751D3379B84A1AD2C1B27B61B40F06317ECC8342D392922A6B214C2DFDDC9C3E5C995CF0E11B4AAFB1785EBA9AB85686FAA86136E7D6C68DE59 512
+time:  2.82117891312
+```
 
 3) To test the AVX implementation, one can run **AVX_test.py** This program does not require any inputs from the user. However, it does depend on the files present in the Test_files directory. In this program, we hash the input message using our AVX approach and a different independently implemented serial approach and compare the results for a wide range of test data to ensure accuracy.
 
 We couldn't find similar reference standards for the tree hashing approach and havent built a testing harness for the same. However, as a sanity check, the output of the tree hashing algorithm for zero height is identical to the non-tree hashing approach. 
+
+```
+user$ python AVX_test.py
+Compiling with /usr/local/bin/clang-omp
+Processing file: ShortMsgKAT_SHAKE128.txt...
+Keccak[r=336, c=64] with '1111' suffix
+OK
+
+Processing file: ShortMsgKAT_SHAKE256.txt...
+Keccak[r=272, c=128] with '1111' suffix
+OK
+
+Processing file: ShortMsgKAT_SHA3-224.txt...
+Keccak[r=288, c=112] with '01' suffix
+OK
+
+Processing file: ShortMsgKAT_SHA3-256.txt...
+Keccak[r=272, c=128] with '01' suffix
+OK
+
+Processing file: ShortMsgKAT_SHA3-384.txt...
+Keccak[r=208, c=192] with '01' suffix
+OK
+
+Processing file: ShortMsgKAT_SHA3-512.txt...
+Keccak[r=144, c=256] with '01' suffix
+OK
+
+Total time taken (seconds) = 33.1799860001
+```
 
 ## References - 
 The base line code in this package essentially consists of two serial implementations of Keccakf. These were derived from https://github.com/gvanas/KeccakCodePackage (keccak.noekeon.org) who had very kindly licensed this to the public domain. These were built on the standards specified in the FIPS 202 (SHA-3) document issued by csrc.nist.gov - http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
