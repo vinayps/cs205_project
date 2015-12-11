@@ -149,7 +149,7 @@
             <div class="section-header">
                 <h2 class="section-title text-center wow fadeInDown">The Application</h2>
                 <p class="text-left wow fadeInDown">
-                    The program design is straight-forward: we provide a command line interface that allows users to calculate the result of the SHA-3 (Keccak) hash function subject to different input parameters. The input format is either a file, or a message string. Importantly, both the parameters of the Keccak function (like output size,) and the parameters of the tree will change the output so we must allow those parameters to be user-specified. We approached the problem by using both multi-core/multi-thread CPU parallelism, and instruction-level parallelism (AVX.)
+                    The program design is straight-forward: we provide a command line interface that allows users to calculate the result of the SHA-3 (Keccak) hash function subject to different input parameters. The input format is either a file, or a message string. Importantly, both the parameters of the Keccak function (like output size) and the parameters of the tree will change the output so we must allow those parameters to be user-specified. We approached the problem by using both multi-core/multi-thread CPU parallelism, and instruction-level parallelism (AVX/AVX2). Specifically, in the tree hashing approach we first chunk up the input message and process multiple chunks in parallel. Then, using instruction-level parallelism we speed up the processing of each of the tree node processes. Thus, using this kind of a hierarchical approach we are able to see a significant speed-up in performance - more so than either approach would provide on its own. 
                     
                 </p>
 
@@ -169,20 +169,20 @@
     <section id="animated-number">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title text-center wow fadeInDown">Speedup</h2>
+                <h2 class="section-title text-center wow fadeInDown">Speedup (time reduction percentage)</h2>
                 <p class="text-center wow fadeInDown">Some quick statstics about performance with AVX and tree hashing.</p>
             </div>
 
             <div class="row text-center">
                 <div class="col-sm-4 col-xs-6">
                     <div class="wow fadeInUp" data-wow-duration="400ms" data-wow-delay="0ms">
-                        <div class="animated-number" data-digit="30" data-duration="1000"></div>
+                        <div class="animated-number" data-digit="45" data-duration="1000"></div>
                         <strong>AVX (%)</strong>
                     </div>
                 </div>
                 <div class="col-sm-4 col-xs-6">
                     <div class="wow fadeInUp" data-wow-duration="400ms" data-wow-delay="100ms">
-                        <div class="animated-number" data-digit="40" data-duration="1000"></div>
+                        <div class="animated-number" data-digit="52" data-duration="1000"></div>
                         <strong>TREE HASHING (%)</strong>
                     </div>
                 </div>
