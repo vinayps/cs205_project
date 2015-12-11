@@ -4,6 +4,7 @@ Parallel implementation of SHA3 - Keccakf(400)
 ## Introduction 
 The goal of this project is to develop a parallel implementation of the SHA3-Keccak algorithm. We have taken two approaches to doing this - multi-core/multi-thread CPU parallelism and instruction-level parallelism (SIMD - AVX/AVX2). By combining both approaches hierarchically, we get speed ups of between 3x to 4x depending on the size of the input message (larger the message, greater the speedup). 
 We have specifically implemented this for Keccak-f(400). 
+
 System requirements - Your system should be able to leverage AVX instructions (appropriate C compilers) and run Python 2.7. We have tested this on a MacBook Pro 13", Retina (early 2015).
 
 ## Content
