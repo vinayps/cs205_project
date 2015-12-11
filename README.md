@@ -106,7 +106,7 @@ Total time taken (seconds) = 33.1799860001
 ```
 
 ## References - 
-The base line code in this package essentially consists of two serial implementations of Keccakf. These were derived from https://github.com/gvanas/KeccakCodePackage (keccak.noekeon.org) who had very kindly licensed this to the public domain. These were built on the standards specified in the FIPS 202 (SHA-3) document issued by csrc.nist.gov - http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+The base line code in this package essentially consists of two serial implementations of Keccak-f. These were derived from https://github.com/gvanas/KeccakCodePackage (keccak.noekeon.org) who had very kindly licensed this to the public domain. These were built on the standards specified in the FIPS 202 (SHA-3) document issued by csrc.nist.gov - http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
 
 More information can be found on Keccak in general at keccak.noekeon.org and on the FIPS 202 standard at csrc.nist.gov
 
