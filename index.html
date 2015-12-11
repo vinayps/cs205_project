@@ -254,16 +254,15 @@
             <div class="section-header">
                 <h2 class="section-title text-center wow fadeInDown">Results</h2>
                 <h3>AVX results</h3>
-                <p class="text-left wow fadeInDown">
-                    AVX Results here
+                <p class="text-left wow fadeInDown"></p>
                 </p>
                 </p>
                 <h3>Tree hashing results</h3>
                 <p class="text-left wow fadeInDown">                    
-                    Tree hashing allowed for CPU/multi-core parallelism in calculating the hash function for nodes in the tree. Bits from the input are distributed to the leaves in the tree, and then hash values are recursively calculated up the tree. The hash value for the root node is the final result. This way, each layer of the tree could be computed in parallel at the very least. The result is around 30 - 40% reduction in processing time, which increases as the size of the input increases. This makes sense since the fixed overheads from setting up the tree are amortized over larger input sizes. The theoretical upper bound on my laptop (2 cores with hyperthreading) should be a bit over 2x speedup, so this result is not too bad.
+                    Tree hashing allowed for CPU/multi-core parallelism in calculating the hash function for nodes in the tree. Bits from the input are distributed to the leaves in the tree, and then hash values are recursively calculated up the tree. The hash value for the root node is the final result. This way, each layer of the tree could be computed in parallel at the very least. The result is around 50 - 55% reduction in processing time, which increases as the size of the input increases. This makes sense since the fixed overheads from setting up the tree are amortized over larger input sizes. The theoretical upper bound on my laptop (2 cores with hyperthreading) should be a bit over 2x speedup, so this result is not too bad.
                 </p>
                 <p class="text-left wow fadeInDown">                    
-                    One area that we optmised was the allocation of bits to the leaves of the tree. Using the reference algorithm, this step is particularly slow in Python. Note that the resulting hash value is going to depend on the parameters of the tree, so it cannot be directly compared to the has value returned by a serial implementation (or even a differently parameterised tree hash.)
+                    One area that we optmised was the allocation of bits to the leaves of the tree. Using the reference algorithm, this step is particularly slow in Python. Note that the resulting hash value is going to depend on the parameters of the tree, so it cannot be directly compared to the hash value returned by a serial implementation (or even a differently parameterised tree hash).
                 </p>
                 <p class="text-left wow fadeInDown">
                     <h3>AVX + Tree hashing results</h3>
