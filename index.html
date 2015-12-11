@@ -203,14 +203,6 @@
                 <p class="text-center wow fadeInDown">We processed the results of SHA-3 (Keccak) hashing using AVX, tree hashing, and AVX + tree hashing. The figures below show the significant processing speed gains that can be achieved.</p>
             </div>
 
-            <div class="text-center">
-                <ul class="portfolio-filter">
-                    <li><a class="active" href="#" data-filter="*">All groups</a></li>
-                    <li><a href="#" data-filter=".tree">Tree hashing</a></li>
-                    <li><a href="#" data-filter=".avx">AVX</a></li>
-                </ul><!--/#portfolio-filter-->
-            </div>
-
             <div class="portfolio-items">
                 <div class="portfolio-item tree">
                     <div class="portfolio-item-inner">
@@ -300,6 +292,7 @@
             <div class="section-header">
                 <h2 class="section-title text-center wow fadeInDown">Takeaways</h2>
                 <p class="text-left wow fadeInDown">
+                    Using both tree-hashing and instruction-level parallelism, we saw significant performance gains in the computation of SHA-3 hash values.
                     Interesting insights we gained from this project:
                     <ul>
                         <li>Greater understanding of cryptographic hash functions. We didn't realise that the tree hashing would change the resulting digest value depending on the parameters. However, tree hashing is provably secure in the same way as the serial implementation.</li>
